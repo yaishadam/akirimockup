@@ -453,7 +453,12 @@ body.ready .lock-word.r{opacity:1;transform:none;transition-delay:300ms}
   display:inline-block;
   font-size:clamp(1.8rem,4.4vw,3.6rem);
   transform:translate(.1em,.24em) rotate(-2deg);
-  margin-right:.28em;
+  /* background-clip:text paints only inside this element's box, and the script
+     face's entry strokes and tails overshoot it — so the glyph edges were being
+     clipped. Pad the paint area out, then cancel the padding again in layout. */
+  padding:.22em .3em .3em;
+  margin:-.22em -.3em -.3em;
+  margin-right:calc(.28em - .3em);
 }
 .statement .tag{display:block;margin-bottom:var(--gap-s)}
 
