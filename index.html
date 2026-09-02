@@ -168,12 +168,18 @@ body.no-logo .mark{background-color:transparent}
 /* the glint — a specular sweep travelling across the cursive word.
    Runs only while the word is actually on screen. */
 .glint{
+  /* The solid colour is the floor: background-clip:text clips this too, so the
+     word still paints even if the gradient sits off the element. Without it a
+     stray background-position makes the text vanish completely. */
+  background-color:var(--sea);
   background-image:linear-gradient(100deg,
     var(--sea) 0%, var(--sea) 36%,
     #7FBEE6 45%, #DCF0FF 50%, #7FBEE6 55%,
     var(--sea) 64%, var(--sea) 100%);
   background-size:300% 100%;
-  background-position:190% 0;
+  /* With a 300% image, only 0%–100% keeps it over the text. Anything outside
+     that range slides the gradient clear of the glyphs. */
+  background-position:100% 0;
   background-repeat:no-repeat;
   -webkit-background-clip:text;background-clip:text;
 }
@@ -182,8 +188,8 @@ body.no-logo .mark{background-color:transparent}
 }
 .glint.shine{animation:glint 4.6s var(--ease) infinite}
 @keyframes glint{
-  0%{background-position:190% 0}
-  60%,100%{background-position:-110% 0}
+  0%{background-position:100% 0}
+  60%,100%{background-position:0% 0}
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -456,17 +462,22 @@ body.ready .lock-word.r{opacity:1;transform:none;transition-delay:300ms}
 .thaana{
   margin-top:clamp(2.4rem,5vw,4rem);
   direction:rtl;
-  line-height:2.05;
-  text-align:center;   /* plain inline text — no flex, so it actually centres */
+  text-align:center;   /* plain text — no flex, so it actually centres */
 }
+/* the word leads, the definition sits on its own line beneath it */
 .th-word{
+  display:block;
   font-family:'Bolhu',sans-serif;font-weight:700;
-  font-size:clamp(2.3rem,4.8vw,3.9rem);
+  font-size:clamp(2.8rem,6vw,5rem);
+  line-height:1.6;
   color:var(--brand);
 }
 .th-def{
+  display:block;
+  margin-top:.2em;
   font-family:'Faagathi Neon',sans-serif;font-weight:300;
-  font-size:clamp(2.2rem,4.3vw,3.5rem);
+  font-size:clamp(2.4rem,4.8vw,3.9rem);
+  line-height:1.75;
   color:var(--ink);
 }
 /* a hairline sits above the entry, the width of the word */
@@ -953,7 +964,7 @@ footer{background:var(--brand);color:var(--cream);padding-block:var(--gap-m) var
       </p>
 
       <p class="thaana r" dir="rtl" lang="dv" style="--d:260ms">
-        <span class="th-word">އަކިރި</span><span class="th-def">: މުރަކައިގެ މަރުވެފައި ހުންނަ އެތިއެތިކޮޅު</span>
+        <span class="th-word">އަކިރި</span><span class="th-def">މުރަކައިގެ މަރުވެފައި ހުންނަ އެތިއެތިކޮޅު</span>
       </p>
     </div>
   </div>
