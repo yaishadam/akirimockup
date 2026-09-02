@@ -1,0 +1,1409 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Akiri Studio — The Sun Pendant</title>
+<meta name="description" content="Akiri Studio. In Dhivehi, akiri describes the small, naturally broken pieces of coral found along our shores.">
+<meta name="theme-color" content="#FFF9E9">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@200;300;400;500&family=Karla:wght@300;400&family=Petit+Formal+Script&display=swap" rel="stylesheet">
+
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   Thaana — supplied faces, for the Dhivehi definition of akiri
+   ═══════════════════════════════════════════════════════════════ */
+@font-face{
+  font-family:'Bolhu';
+  src:url('assets/fonts/Bolhu-Bold.ttf') format('truetype');
+  font-weight:700;font-style:normal;font-display:swap;
+}
+@font-face{
+  font-family:'Faagathi Neon';
+  src:url('assets/fonts/FaagathiNeon-Light.ttf') format('truetype');
+  font-weight:300;font-style:normal;font-display:swap;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   AKIRI STUDIO — tokens
+   ═══════════════════════════════════════════════════════════════ */
+:root{
+  --cream:#FFF9E9;
+  --sand:#E9E8D4;
+  --sea:#2F71A3;
+  --deep:#164D76;
+  --sky:#ABC5D6;
+  --ink:#1C2E36;
+
+  /* sampled straight out of the supplied logo file — the wordmark uses it */
+  --brand:#1A3147;
+
+  --ink-70:rgba(28,46,54,.70);
+  --ink-mute:rgba(28,46,54,.72);   /* small labels — holds 4.8:1 on cream */
+  --ink-16:rgba(28,46,54,.16);
+  --cream-72:rgba(255,249,233,.72);
+  --cream-18:rgba(255,249,233,.18);
+
+  --f-sans:'Jost',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-serif:'Cormorant Garamond','Iowan Old Style',Georgia,serif;
+  --f-body:'Karla',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-script:'Petit Formal Script','Snell Roundhand',cursive;
+
+  /* vertical rhythm — air is the primary design material */
+  --gap-xs:clamp(1.5rem,3vw,2.5rem);
+  --gap-s:clamp(3rem,6vw,5rem);
+  --gap-m:clamp(6rem,11vw,10rem);
+  --gap-l:clamp(9rem,17vw,17rem);
+  --gap-xl:clamp(8rem,16vw,15rem);
+
+  --pad:clamp(1.5rem,5.5vw,5.5rem);
+  --rule:rgba(28,46,54,.14);
+
+  --ease:cubic-bezier(.22,.61,.36,1);
+  /* the two springs everything bouncy is tuned against */
+  --spring:cubic-bezier(.34,1.56,.64,1);        /* overshoots — for arrivals   */
+  --spring-soft:cubic-bezier(.22,1.16,.36,1);   /* barely overshoots — for art */
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--cream);
+  color:var(--ink);
+  font-family:var(--f-body);
+  font-weight:300;
+  font-size:clamp(.95rem,.9rem + .18vw,1.0625rem);
+  line-height:1.78;
+  letter-spacing:.012em;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  overflow-x:hidden;
+}
+img{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+h1,h2,h3,p,figure,blockquote{margin:0}
+
+::selection{background:var(--sky);color:var(--ink)}
+
+:focus-visible{
+  outline:1px solid var(--sea);
+  outline-offset:5px;
+}
+
+/* paper — a whisper of tooth over the cream */
+body::after{
+  content:"";position:fixed;inset:0;z-index:900;pointer-events:none;
+  opacity:.035;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.skip{
+  position:fixed;top:-100px;left:var(--pad);z-index:1200;
+  background:var(--brand);color:var(--cream);
+  padding:.7rem 1.2rem;font-family:var(--f-sans);font-size:.7rem;
+  letter-spacing:.22em;text-transform:uppercase;
+  transition:top 300ms var(--ease);
+}
+.skip:focus{top:1rem}
+
+/* ═══════════════════════════════════════════════════════════════
+   The mark — the supplied logo file itself, never redrawn.
+   Masked so one PNG recolours to navy on cream and cream on navy.
+   ═══════════════════════════════════════════════════════════════ */
+.mark{
+  display:block;
+  background-color:currentColor;
+  -webkit-mask-image:url("assets/logo.png");
+          mask-image:url("assets/logo.png");
+  -webkit-mask-repeat:no-repeat;   mask-repeat:no-repeat;
+  -webkit-mask-position:center;    mask-position:center;
+  -webkit-mask-size:contain;       mask-size:contain;
+  aspect-ratio:1/1;
+}
+/* if mask-image is unsupported, fall back to the plain image */
+@supports not ((-webkit-mask-image:url("#")) or (mask-image:url("#"))){
+  .mark{background:url("assets/logo.png") center/contain no-repeat}
+}
+/* A missing logo.png would otherwise leave the mask unapplied and paint a
+   solid navy block. If the file cannot be loaded, show nothing at all. */
+body.no-logo .mark{background-color:transparent}
+
+/* ═══════════════════════════════════════════════════════════════
+   Cursor — a small disc that inverts whatever it crosses.
+   Same mechanism JURI uses: page-coloured dot, blended on difference.
+   ═══════════════════════════════════════════════════════════════ */
+.cursor{
+  position:fixed;top:0;left:0;z-index:1000;
+  width:14px;height:14px;border-radius:50%;
+  background:var(--cream);
+  mix-blend-mode:difference;
+  pointer-events:none;opacity:0;
+  will-change:transform;
+  transition:width 480ms var(--spring),height 480ms var(--spring),opacity 300ms linear;
+}
+.cursor.on{opacity:1}
+.cursor.hot{width:58px;height:58px}
+@media (hover:none),(pointer:coarse){.cursor{display:none!important}}
+
+/* ═══════════════════════════════════════════════════════════════
+   Type primitives
+   ═══════════════════════════════════════════════════════════════ */
+.tag{
+  font-family:var(--f-sans);font-weight:300;
+  font-size:.625rem;letter-spacing:.44em;text-transform:uppercase;
+  color:var(--ink-mute);
+}
+.serif{
+  font-family:var(--f-serif);font-weight:300;
+  line-height:1.14;letter-spacing:.005em;
+}
+.script{
+  font-family:var(--f-script);font-weight:400;
+  letter-spacing:.01em;color:var(--sea);
+}
+
+/* the glint — a specular sweep travelling across the cursive word.
+   Runs only while the word is actually on screen. */
+.glint{
+  background-image:linear-gradient(100deg,
+    var(--sea) 0%, var(--sea) 36%,
+    #7FBEE6 45%, #DCF0FF 50%, #7FBEE6 55%,
+    var(--sea) 64%, var(--sea) 100%);
+  background-size:300% 100%;
+  background-position:190% 0;
+  background-repeat:no-repeat;
+  -webkit-background-clip:text;background-clip:text;
+}
+@supports ((-webkit-background-clip:text) or (background-clip:text)){
+  .glint{-webkit-text-fill-color:transparent;color:transparent}
+}
+.glint.shine{animation:glint 4.6s var(--ease) infinite}
+@keyframes glint{
+  0%{background-position:190% 0}
+  60%,100%{background-position:-110% 0}
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Load-in — the mark on cream
+   ═══════════════════════════════════════════════════════════════ */
+#veil{
+  position:fixed;inset:0;z-index:1100;
+  background:var(--cream);
+  display:grid;place-items:center;
+  transition:opacity 1000ms var(--ease),visibility 0s linear 1000ms;
+}
+#veil .mark{width:62px;color:var(--brand);opacity:0;
+  animation:breathe 2400ms var(--spring-soft) forwards}
+@keyframes breathe{
+  0%{opacity:0;transform:scale(.9)}
+  40%{opacity:.92;transform:scale(1)}
+  100%{opacity:.92;transform:scale(1)}
+}
+body.ready #veil{opacity:0;visibility:hidden}
+
+/* ═══════════════════════════════════════════════════════════════
+   Header — hairline, JURI cadence.
+   The hero photograph is bright, so the header is ink throughout.
+   ═══════════════════════════════════════════════════════════════ */
+#hdr{
+  position:fixed;top:0;left:0;right:0;z-index:600;
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
+  gap:1rem;
+  padding:clamp(1.1rem,2.2vw,1.7rem) var(--pad);
+  font-family:var(--f-sans);font-weight:400;
+  font-size:.75rem;letter-spacing:.2em;text-transform:lowercase;
+  color:var(--brand);
+  border-bottom:1px solid rgba(26,49,71,.2);
+  background:transparent;
+  transition:background-color 600ms var(--ease),border-color 600ms var(--ease),
+             backdrop-filter 600ms var(--ease);
+}
+#hdr.solid{
+  background:rgba(255,249,233,.88);
+  -webkit-backdrop-filter:blur(14px) saturate(1.1);
+  backdrop-filter:blur(14px) saturate(1.1);
+  border-bottom-color:var(--rule);
+}
+.hdr-l{display:flex;align-items:center;gap:.55rem;justify-self:start}
+.dot{
+  width:5px;height:5px;border-radius:50%;
+  background:currentColor;
+  transition:transform 520ms var(--spring);
+}
+.hdr-l:hover .dot{transform:scale(1.9)}
+.hdr-c{
+  justify-self:center;
+  letter-spacing:.52em;text-transform:uppercase;font-size:.75rem;
+  padding-left:.52em; /* optical centring against trailing tracking */
+  white-space:nowrap;
+}
+.hdr-r{justify-self:end;white-space:nowrap}
+
+/* ═══════════════════════════════════════════════════════════════
+   Edge labels
+   ═══════════════════════════════════════════════════════════════ */
+.edge{
+  position:fixed;top:50%;z-index:500;
+  writing-mode:vertical-rl;
+  font-family:var(--f-sans);font-weight:400;
+  font-size:.625rem;letter-spacing:.42em;text-transform:uppercase;
+  pointer-events:none;
+  color:var(--ink-mute);
+  transition:opacity 600ms var(--ease);
+}
+.edge-l{left:clamp(.9rem,1.6vw,1.6rem);transform:translateY(-50%) rotate(180deg)}
+.edge-r{right:clamp(.9rem,1.6vw,1.6rem);transform:translateY(-50%)}
+.edge.hide{opacity:0}
+@media (max-width:1180px){.edge{display:none}}
+
+/* ═══════════════════════════════════════════════════════════════
+   Image slots
+   ═══════════════════════════════════════════════════════════════ */
+.slot{position:relative;overflow:hidden;background:var(--sand)}
+.slot img{
+  width:100%;height:100%;object-fit:cover;object-position:center;
+  opacity:0;transition:opacity 1000ms var(--ease);
+}
+.slot img.loaded{opacity:1}
+
+.g-ocean{
+  background:
+    radial-gradient(120% 80% at 22% 8%, rgba(255,249,233,.44) 0%, rgba(255,249,233,0) 46%),
+    linear-gradient(178deg, #7FA9BE 0%, #4F8EAE 26%, #2F71A3 58%, #164D76 100%);
+}
+.g-warm{
+  background:
+    radial-gradient(58% 46% at 34% 24%, rgba(255,249,233,.95) 0%, rgba(255,249,233,0) 64%),
+    linear-gradient(158deg, #F3ECD8 0%, #E9E8D4 32%, #D2D8CE 62%, #B4C6CD 100%);
+}
+.g-shore{
+  background:
+    radial-gradient(70% 60% at 68% 18%, rgba(255,249,233,.6) 0%, rgba(255,249,233,0) 58%),
+    linear-gradient(200deg, #C9DAE2 0%, #ABC5D6 34%, #6E9CB8 66%, #2F71A3 100%);
+}
+.fig-a .slot::after,.fig-b .slot::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  box-shadow:inset 0 0 0 1px rgba(28,46,54,.07);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Hero
+   ═══════════════════════════════════════════════════════════════ */
+.hero{
+  position:relative;
+  height:100svh;min-height:560px;
+  overflow:hidden;
+  display:grid;
+  isolation:isolate;
+}
+.hero-media{position:absolute;inset:-6% 0 -6% 0;z-index:0;will-change:transform}
+.hero-media img{height:100%}
+
+/* The photograph is bright white foam. A cream wash plus a soft bloom behind
+   the lockup carries brand-navy type to ~8.5:1 even over the darkest water,
+   while keeping the picture airy — a darkening scrim would kill the light. */
+.hero-scrim{
+  position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:
+    radial-gradient(72% 46% at 50% 46%, rgba(255,249,233,.5) 0%, rgba(255,249,233,0) 72%),
+    rgba(255,249,233,.26);
+}
+.hero-scrim::before,.hero-scrim::after{content:"";position:absolute;left:0;right:0}
+.hero-scrim::before{
+  top:0;height:30%;
+  background:linear-gradient(to bottom, rgba(255,249,233,.72) 0%, rgba(255,249,233,0) 100%);
+}
+.hero-scrim::after{
+  bottom:0;height:34%;
+  background:linear-gradient(to top, rgba(255,249,233,.62) 0%, rgba(255,249,233,0) 100%);
+}
+.hero-release{
+  position:absolute;left:0;right:0;bottom:0;height:30vh;z-index:2;pointer-events:none;
+  background:linear-gradient(to top, var(--cream) 0%, rgba(255,249,233,.6) 36%, rgba(255,249,233,0) 100%);
+}
+.hero-wash{position:absolute;inset:0;z-index:3;pointer-events:none;background:var(--cream);opacity:0}
+
+/* the split lockup */
+.lock{
+  position:relative;z-index:4;
+  align-self:center;
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
+  gap:clamp(1rem,4vw,4rem);
+  padding:0 var(--pad);
+  width:100%;
+  will-change:transform,opacity;
+}
+.lock-word{
+  font-family:var(--f-sans);font-weight:300;
+  font-size:clamp(2.4rem,9.4vw,9rem);
+  line-height:.92;
+  text-transform:uppercase;
+  color:var(--brand);
+  text-shadow:0 0 26px rgba(255,249,233,.85), 0 0 10px rgba(255,249,233,.7);
+  white-space:nowrap;
+}
+.lock-word.l{justify-self:start;letter-spacing:.11em;padding-left:.02em}
+.lock-word.r{justify-self:end;letter-spacing:.11em;padding-right:.02em}
+.lock-mark{
+  justify-self:center;
+  width:clamp(52px,7.6vw,104px);
+  color:var(--brand);
+  filter:drop-shadow(0 0 14px rgba(255,249,233,.9));
+}
+
+/* the lockup arrives in three staggered pieces */
+.lock-word,.lock-mark{
+  opacity:0;transform:translateY(34px) scale(.96);
+  transition:opacity 800ms var(--ease),transform 1000ms var(--spring);
+}
+body.ready .lock-word.l{opacity:1;transform:none;transition-delay:180ms}
+body.ready .lock-mark  {opacity:1;transform:none;transition-delay:60ms}
+body.ready .lock-word.r{opacity:1;transform:none;transition-delay:300ms}
+
+/* hero nav */
+.hero-nav{
+  position:absolute;left:var(--pad);right:var(--pad);bottom:clamp(1.6rem,3.4vw,2.6rem);
+  z-index:4;
+  display:flex;align-items:flex-end;justify-content:space-between;gap:1.5rem;
+  padding-top:1rem;
+  border-top:1px solid rgba(26,49,71,.26);
+}
+.hero-nav ul{
+  display:flex;flex-wrap:wrap;gap:clamp(1.1rem,2.8vw,2.6rem);
+  list-style:none;margin:0;padding:0;
+}
+.hero-nav a{
+  font-family:var(--f-sans);font-weight:400;
+  font-size:clamp(.875rem,1.05vw,1rem);
+  letter-spacing:.17em;text-transform:lowercase;
+  color:var(--brand);
+  padding-bottom:.36rem;
+  position:relative;display:inline-block;
+  text-shadow:0 0 16px rgba(255,249,233,.95), 0 0 6px rgba(255,249,233,.85);
+  transition:transform 480ms var(--spring);
+}
+.hero-nav a::before{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:1px;
+  background:rgba(26,49,71,.32);
+}
+.hero-nav a::after{
+  content:"";position:absolute;left:0;bottom:0;height:1px;
+  width:0;background:var(--brand);
+  transition:width 560ms var(--spring-soft);
+}
+.hero-nav a:hover,.hero-nav a:focus-visible{transform:translateY(-3px)}
+.hero-nav a:hover::after,.hero-nav a:focus-visible::after{width:100%}
+.hero-nav a[aria-current="page"]::after{width:100%}
+
+.scroll-cue{
+  font-family:var(--f-sans);font-weight:400;
+  font-size:.625rem;letter-spacing:.4em;text-transform:uppercase;
+  color:var(--brand);white-space:nowrap;
+  padding-bottom:.36rem;
+  text-shadow:0 0 16px rgba(255,249,233,.95);
+}
+.scroll-cue span{display:inline-block;animation:drift 2600ms var(--ease) infinite}
+@keyframes drift{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
+
+@media (max-width:900px){
+  .lock{
+    grid-template-columns:1fr;
+    justify-items:center;
+    gap:clamp(.7rem,2.4vw,1.2rem);
+    text-align:center;
+  }
+  .lock-mark{order:-1;width:clamp(50px,13vw,84px);margin-bottom:.8rem}
+  .lock-word{font-size:clamp(2.6rem,13vw,5.4rem)}
+  .lock-word.l,.lock-word.r{justify-self:center;letter-spacing:.18em;padding-left:.18em;padding-right:0}
+  .hero-nav{flex-direction:column;align-items:flex-start;gap:.9rem}
+  .scroll-cue{display:none}
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Layout helpers
+   ═══════════════════════════════════════════════════════════════ */
+.wrap{max-width:1440px;margin:0 auto;padding-inline:var(--pad)}
+.bleed{width:100%}
+.sec{position:relative}
+
+/* ═══════════════════════════════════════════════════════════════
+   Statement — the meaning of the name
+   ═══════════════════════════════════════════════════════════════ */
+.statement{padding-block:var(--gap-xl);text-align:center}
+.statement-inner{max-width:min(1080px,94vw);margin:0 auto;position:relative}
+.statement p{
+  font-family:var(--f-serif);font-weight:300;
+  font-size:clamp(1.6rem,3.9vw,3.2rem);
+  line-height:1.36;letter-spacing:.004em;
+  color:var(--ink);
+  text-wrap:pretty;
+}
+.statement .script{
+  display:inline-block;
+  font-size:clamp(1.8rem,4.4vw,3.6rem);
+  transform:translate(.1em,.24em) rotate(-2deg);
+  margin-right:.28em;
+}
+.statement .tag{display:block;margin-bottom:var(--gap-s)}
+
+/* the Dhivehi entry: the word, then its definition, reading right to left.
+   Thaana carries marks above and below, so it needs a taller line. */
+.thaana{
+  margin-top:clamp(2.4rem,5vw,4rem);
+  direction:rtl;
+  line-height:2.05;
+  text-align:center;   /* plain inline text — no flex, so it actually centres */
+}
+.th-word{
+  font-family:'Bolhu',sans-serif;font-weight:700;
+  font-size:clamp(2.3rem,4.8vw,3.9rem);
+  color:var(--brand);
+}
+.th-def{
+  font-family:'Faagathi Neon',sans-serif;font-weight:300;
+  font-size:clamp(2.2rem,4.3vw,3.5rem);
+  color:var(--ink);
+}
+/* a hairline sits above the entry, the width of the word */
+.thaana::before{
+  content:"";display:block;
+  height:1px;width:74px;margin:0 auto clamp(1.4rem,2.6vw,2.2rem);
+  background:var(--ink-16);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   About — the brand's own words
+   ═══════════════════════════════════════════════════════════════ */
+.about{padding-block:0 var(--gap-l)}
+.about-grid{
+  display:grid;grid-template-columns:repeat(12,1fr);
+  gap:var(--gap-s);align-items:start;
+}
+.about-head{grid-column:1 / span 4}
+.about-head h2{
+  font-family:var(--f-serif);font-weight:300;
+  font-size:clamp(2.4rem,5.4vw,4.4rem);
+  line-height:1.06;letter-spacing:.01em;color:var(--brand);
+  margin-top:.6rem;
+}
+.about-body{grid-column:6 / span 6}
+.about-body p{
+  font-family:var(--f-body);font-weight:300;
+  font-size:clamp(1rem,1.15vw,1.125rem);
+  line-height:1.85;max-width:58ch;color:var(--ink);
+}
+.about-body p + p{margin-top:1.6rem}
+.about-stamp{
+  grid-column:11 / span 2;justify-self:end;
+  width:clamp(88px,9vw,124px);color:var(--ink);opacity:.7;
+}
+@media (max-width:900px){
+  .about-grid{grid-template-columns:1fr;gap:var(--gap-xs)}
+  .about-head,.about-body,.about-stamp{grid-column:1 / -1}
+  .about-stamp{justify-self:start;margin-top:var(--gap-s)}
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Collage
+   ═══════════════════════════════════════════════════════════════ */
+.collage{padding-block:var(--gap-s) var(--gap-l)}
+.collage-head{
+  display:flex;justify-content:space-between;align-items:baseline;
+  gap:2rem;flex-wrap:wrap;
+  padding-bottom:var(--gap-s);
+}
+.collage-grid{
+  display:grid;grid-template-columns:repeat(12,1fr);align-items:start;
+}
+.fig-a{grid-column:1 / span 6;margin-top:clamp(2rem,7vw,7rem)}
+.fig-a .slot{aspect-ratio:4/5}
+.fig-b{grid-column:8 / span 4;margin-top:0;margin-right:calc(var(--pad) * -0.6)}
+.fig-b .slot{aspect-ratio:3/4}
+.fig-loose{
+  grid-column:9 / span 3;
+  margin-top:clamp(4rem,10vw,10rem);
+  display:grid;place-items:center;
+}
+
+figcaption{
+  margin-top:1.1rem;
+  font-family:var(--f-sans);font-weight:400;
+  font-size:.875rem;letter-spacing:.12em;
+  color:var(--ink-70);
+}
+figcaption sup{
+  font-size:.6em;letter-spacing:.1em;
+  margin-left:.45em;color:var(--ink-mute);
+  vertical-align:.5em;
+}
+
+/* the circular @akiristudiomv stamp — the ring turns with the scroll */
+.stamp{position:relative;width:clamp(96px,11vw,150px);color:var(--ink);opacity:.72}
+.stamp svg{width:100%;height:auto;display:block}
+.stamp .stamp-ring{transform-origin:50% 50%;will-change:transform}
+.stamp .mark{
+  position:absolute;left:50%;top:50%;
+  width:44%;transform:translate(-50%,-50%);
+  color:currentColor;
+}
+
+@media (max-width:900px){
+  .collage-grid{grid-template-columns:repeat(6,1fr);row-gap:var(--gap-s)}
+  .fig-a{grid-column:1 / span 6;margin-top:0}
+  .fig-b{grid-column:2 / span 5;margin-right:0;margin-top:0}
+  .fig-loose{grid-column:1 / span 6;margin-top:var(--gap-xs);justify-items:start}
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Product plate
+   ═══════════════════════════════════════════════════════════════ */
+.plate{position:relative;height:clamp(460px,88svh,900px);overflow:hidden}
+.plate .slot{position:absolute;inset:0}
+.plate-scrim{
+  position:absolute;inset:0;
+  background:linear-gradient(to bottom, rgba(22,40,50,.34) 0%, rgba(22,40,50,.12) 40%, rgba(22,40,50,.5) 100%);
+}
+.plate-type{position:absolute;inset:0;display:grid;place-items:center;padding:var(--pad)}
+.plate-stack{position:relative;text-align:center}
+/* The ghost numeral centres on the NAME, not the whole stack. It must not be
+   positioned with a transform: this element also carries .r, and .r.in sets
+   transform:none, which would wipe the offset out entirely. */
+.plate-num{
+  position:absolute;left:0;right:0;top:0;
+  margin-top:-.14em;
+  text-align:center;
+  font-family:var(--f-sans);font-weight:200;
+  /* min tracks the name's own min (2.4rem) at the same ~1.8x ratio, so the
+     ghost never outgrows the name and drops onto the subtitle on small screens */
+  font-size:clamp(4.3rem,16vw,14rem);
+  line-height:.8;letter-spacing:.04em;
+  color:transparent;
+  -webkit-text-stroke:1px rgba(255,249,233,.42);
+  pointer-events:none;user-select:none;
+}
+.plate-name{
+  position:relative;
+  font-family:var(--f-serif);font-weight:300;
+  font-size:clamp(2.4rem,9vw,7.6rem);
+  line-height:1.02;letter-spacing:.045em;
+  color:var(--cream);
+  text-shadow:0 2px 30px rgba(18,36,46,.55);
+}
+.plate-sub{
+  position:relative;display:block;margin-top:clamp(1.5rem,2.2vw,1.8rem);
+  font-family:var(--f-sans);font-weight:400;
+  font-size:.6875rem;letter-spacing:.44em;text-transform:uppercase;
+  color:var(--cream-72);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Three-line stacked caps opener
+   ═══════════════════════════════════════════════════════════════ */
+.triad{padding-block:var(--gap-l) var(--gap-m)}
+.triad .tag{display:block;margin-bottom:var(--gap-s)}
+.triad p{
+  font-family:var(--f-sans);font-weight:200;
+  font-size:clamp(2rem,7.6vw,6.4rem);
+  line-height:1.08;letter-spacing:.09em;
+  text-transform:uppercase;
+  color:var(--brand);
+  max-width:16ch;
+}
+.triad span{display:block}
+.triad span:nth-child(2){padding-left:clamp(.6rem,4vw,4.5rem)}
+.triad span:nth-child(3){padding-left:clamp(1.2rem,8vw,9rem);color:var(--sea)}
+
+/* ═══════════════════════════════════════════════════════════════
+   Story
+   ═══════════════════════════════════════════════════════════════ */
+.story{padding-block:0 var(--gap-l)}
+.story-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--gap-s);align-items:start}
+.story-body{grid-column:6 / span 5}
+.story-side{grid-column:1 / span 3;padding-top:.7rem}
+.story-body p{
+  font-family:var(--f-serif);font-style:italic;font-weight:300;
+  font-size:clamp(1.25rem,2.1vw,1.75rem);
+  line-height:1.62;letter-spacing:.006em;
+  max-width:50ch;color:var(--ink);
+}
+.story-meta{
+  display:flex;flex-direction:column;gap:.5rem;
+  font-family:var(--f-body);font-weight:300;font-size:.875rem;
+  color:var(--ink-70);letter-spacing:.04em;
+}
+.story-meta dl{display:grid;grid-template-columns:auto 1fr;gap:.35rem 1.4rem;margin:0}
+.story-meta dt{font-family:var(--f-sans);font-size:.625rem;letter-spacing:.28em;text-transform:uppercase;color:var(--ink-mute);line-height:2}
+.story-meta dd{margin:0;line-height:2}
+
+.enquire{
+  display:inline-block;margin-top:var(--gap-s);
+  font-family:var(--f-sans);font-weight:400;
+  font-size:1rem;letter-spacing:.28em;text-transform:lowercase;
+  color:var(--brand);
+  padding-bottom:.5rem;position:relative;
+  transition:transform 520ms var(--spring);
+}
+.enquire::before,.enquire::after{content:"";position:absolute;left:0;bottom:0;height:1px}
+.enquire::before{width:100%;background:var(--ink-16)}
+.enquire::after{width:0;background:var(--brand);transition:width 680ms var(--spring-soft)}
+.enquire:hover,.enquire:focus-visible{transform:translateY(-3px)}
+.enquire:hover::after,.enquire:focus-visible::after{width:100%}
+
+@media (max-width:900px){
+  .story-grid{grid-template-columns:1fr;gap:var(--gap-xs)}
+  .story-body,.story-side{grid-column:1 / -1}
+  .story-side{order:-1;padding-top:0}
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Care — the sustainability passage, on sand
+   ═══════════════════════════════════════════════════════════════ */
+.care{background:var(--sand);padding-block:var(--gap-m)}
+.care-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--gap-s);align-items:start}
+.care-tag{grid-column:1 / span 3}
+.care-body{grid-column:5 / span 7}
+.care-body p{
+  font-family:var(--f-body);font-weight:300;
+  font-size:clamp(1rem,1.15vw,1.125rem);
+  line-height:1.85;max-width:62ch;color:var(--ink);
+}
+@media (max-width:900px){
+  .care-grid{grid-template-columns:1fr;gap:var(--gap-xs)}
+  .care-tag,.care-body{grid-column:1 / -1}
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Image break
+   ═══════════════════════════════════════════════════════════════ */
+.break{height:clamp(420px,82svh,860px)}
+.break .slot{height:100%}
+
+/* ═══════════════════════════════════════════════════════════════
+   Shells — the supplied line drawings, cut out and scattered into
+   the whitespace. Decorative only: never announced, never clickable,
+   always behind the words.
+   ═══════════════════════════════════════════════════════════════ */
+.shell{
+  position:absolute;
+  top:var(--t);left:var(--l);
+  width:var(--w,64px);
+  z-index:0;pointer-events:none;user-select:none;
+  will-change:transform;
+}
+/* right-hand shells anchor to the right edge so they can never overhang it */
+.shell--r{left:auto;right:var(--r)}
+.shell img{
+  width:100%;height:auto;display:block;
+  opacity:0;
+  transform:rotate(var(--rot,0deg)) scale(.84);
+  transition:opacity 1400ms var(--ease),transform 1500ms var(--spring-soft);
+}
+.shell.in img{opacity:var(--op,.2);transform:rotate(var(--rot,0deg)) scale(1)}
+/* text always sits above the scatter */
+.wrap{position:relative;z-index:1}
+@media (max-width:900px){
+  /* the care passages go full-width here, so the side margins the shells
+     lived in disappear — drop those two rather than let them sit on the copy */
+  .care .shell{display:none}
+}
+@media (max-width:700px){
+  /* smaller shells on a phone — they must never crowd the copy */
+  .shell{width:calc(var(--w,64px) * .62);opacity:.8}
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Instagram
+   ═══════════════════════════════════════════════════════════════ */
+.ig{
+  display:inline-flex;align-items:center;justify-content:center;gap:.55rem;
+  transition:transform 520ms var(--spring),opacity 420ms var(--ease);
+}
+.ig svg{width:1.15em;height:1.15em;display:block;flex:none}
+.ig:hover,.ig:focus-visible{transform:translateY(-3px)}
+.hdr-r{display:inline-flex;align-items:center;gap:.9rem}
+.hdr-ig{display:inline-flex;transition:transform 520ms var(--spring)}
+.hdr-ig svg{width:15px;height:15px;display:block}
+.hdr-ig:hover{transform:translateY(-2px) rotate(-6deg)}
+/* the footer's larger icon button */
+.ig-badge{
+  width:44px;height:44px;border-radius:50%;
+  border:1px solid rgba(255,249,233,.34);
+  color:var(--cream);
+  transition:transform 560ms var(--spring),background-color 420ms var(--ease),
+             border-color 420ms var(--ease);
+}
+.ig-badge svg{width:19px;height:19px}
+.ig-badge:hover,.ig-badge:focus-visible{
+  transform:translateY(-4px) scale(1.06);
+  background:rgba(255,249,233,.1);
+  border-color:rgba(255,249,233,.7);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Footer
+   ═══════════════════════════════════════════════════════════════ */
+footer{background:var(--brand);color:var(--cream);padding-block:var(--gap-m) var(--gap-s)}
+.foot-grid{
+  display:grid;grid-template-columns:repeat(12,1fr);
+  gap:var(--gap-s) var(--gap-xs);align-items:start;
+}
+.foot-mark{grid-column:1 / span 2;width:clamp(46px,4.6vw,66px);color:var(--cream);opacity:.92}
+.foot-line{grid-column:4 / span 4}
+.foot-line p{
+  font-family:var(--f-serif);font-style:italic;font-weight:300;
+  font-size:clamp(1.1rem,1.7vw,1.4rem);line-height:1.55;
+  color:var(--cream);opacity:.92;max-width:36ch;
+}
+.foot-links{grid-column:9 / span 2}
+.foot-meta{grid-column:11 / span 2}
+.foot-links ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.72rem}
+.foot-links a{
+  font-family:var(--f-sans);font-weight:400;
+  font-size:.875rem;letter-spacing:.14em;text-transform:lowercase;
+  color:var(--cream);opacity:.82;
+  transition:opacity 420ms var(--ease),transform 480ms var(--spring);
+  position:relative;padding-bottom:.2rem;display:inline-block;
+}
+.foot-links a::after{
+  content:"";position:absolute;left:0;bottom:0;height:1px;width:0;
+  background:var(--cream);transition:width 560ms var(--spring-soft);
+}
+.foot-links a:hover,.foot-links a:focus-visible{opacity:1;transform:translateX(4px)}
+.foot-links a:hover::after,.foot-links a:focus-visible::after{width:100%}
+.foot-meta{display:flex;flex-direction:column;gap:.72rem}
+.clock{
+  font-family:var(--f-sans);font-weight:300;
+  font-size:.875rem;letter-spacing:.14em;
+  color:rgba(255,249,233,.92);
+  font-variant-numeric:tabular-nums;
+}
+.clock b{font-weight:300}
+.clock .lbl{
+  display:block;font-size:.625rem;letter-spacing:.36em;text-transform:uppercase;
+  color:rgba(255,249,233,.76);margin-bottom:.4rem;
+}
+.foot-rule{
+  margin-top:var(--gap-m);padding-top:1.4rem;
+  border-top:1px solid rgba(255,249,233,.18);
+  display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wrap;
+  font-family:var(--f-sans);font-weight:300;
+  font-size:.6875rem;letter-spacing:.28em;text-transform:uppercase;
+  color:rgba(255,249,233,.78);
+}
+@media (max-width:900px){
+  .foot-grid{grid-template-columns:1fr;gap:var(--gap-s)}
+  .foot-mark,.foot-line,.foot-links,.foot-meta{grid-column:1 / -1}
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Motion — text rises with a spring; pictures pop open from a crop
+   ═══════════════════════════════════════════════════════════════ */
+.r{
+  opacity:0;transform:translateY(38px) scale(.98);
+  transition:opacity 700ms var(--ease),transform 900ms var(--spring);
+  transition-delay:var(--d,0ms);
+}
+.r.in{opacity:1;transform:none}
+
+.pop .slot{
+  clip-path:inset(14% 11% 14% 11%);
+  transition:clip-path 1100ms var(--spring-soft);
+  transition-delay:var(--d,0ms);
+}
+.pop .slot img{
+  transform:scale(1.16);
+  transition:transform 1400ms var(--spring-soft),opacity 1000ms var(--ease);
+  transition-delay:var(--d,0ms);
+}
+.pop.in .slot{clip-path:inset(0% 0% 0% 0%)}
+.pop.in .slot img{transform:scale(1)}
+
+.pop figcaption{
+  opacity:0;transform:translateY(16px);
+  transition:opacity 600ms var(--ease),transform 700ms var(--spring);
+  transition-delay:calc(var(--d,0ms) + 320ms);
+}
+.pop.in figcaption{opacity:1;transform:none}
+
+/* hover: the photograph leans in. Declared after the pop rules and carrying
+   the extra :hover, so it outranks the settled `scale(1)` state. */
+@media (hover:hover) and (pointer:fine){
+  figure.pop.in:hover .slot img{
+    transform:scale(1.06);
+    transition:transform 900ms var(--spring-soft) 0ms;
+  }
+  section.pop.in:hover .slot img{      /* full-bleed frames move less */
+    transform:scale(1.03);
+    transition:transform 1100ms var(--spring-soft) 0ms;
+  }
+  figure.pop.in:hover figcaption{color:var(--brand)}
+  figure.pop .slot,section.pop .slot{will-change:transform}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms !important;animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;scroll-behavior:auto !important;
+  }
+  .r,.pop figcaption{opacity:1;transform:none}
+  .pop .slot{clip-path:none}
+  .pop .slot img{transform:none}
+  .lock-word,.lock-mark{opacity:1;transform:none}
+  .hero-media{transform:none !important}
+  .lock{transform:none !important;opacity:1 !important}
+  .stamp .stamp-ring{transform:none !important}
+  .cursor{display:none !important}
+  .scroll-cue span{animation:none}
+  .glint.shine{animation:none}
+  .shell{transform:none !important}
+  .shell img{opacity:var(--op,.2);transform:rotate(var(--rot,0deg))}
+  /* keep the cursive word solid rather than mid-sweep */
+  .glint{background-image:none;-webkit-text-fill-color:var(--sea);color:var(--sea)}
+}
+</style>
+</head>
+
+<body>
+
+<!-- ── the inverting cursor disc ─────────────────────────────── -->
+<div class="cursor" id="cursor" aria-hidden="true"></div>
+
+<!-- ── load-in: the mark on cream ───────────────────────────── -->
+<div id="veil" aria-hidden="true"><span class="mark"></span></div>
+
+<a class="skip" href="#main">skip to content</a>
+
+<!-- ── header ───────────────────────────────────────────────── -->
+<header id="hdr">
+  <a class="hdr-l" href="#main"><span class="dot" aria-hidden="true"></span>menu</a>
+  <span class="hdr-c">Akiri Studio</span>
+  <span class="hdr-r">
+    <a class="hdr-ig" href="https://www.instagram.com/akiristudiomv/"
+       target="_blank" rel="noopener noreferrer" aria-label="Akiri Studio on Instagram">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="3" y="3" width="18" height="18" rx="5"/>
+        <circle cx="12" cy="12" r="4.2"/>
+        <circle cx="17.2" cy="6.8" r="1.15" fill="currentColor" stroke="none"/>
+      </svg>
+    </a>
+    <a href="#enquire">cart (0)</a>
+  </span>
+</header>
+
+<span class="edge edge-l" id="edgeL" aria-hidden="true">Maldives</span>
+<span class="edge edge-r" aria-hidden="true">Akiri Studio — Malé</span>
+
+<main id="main">
+
+<!-- ═══ 1 · HERO ═══════════════════════════════════════════════ -->
+<section class="hero" aria-label="Akiri Studio">
+  <div class="hero-media" id="heroMedia">
+    <div class="slot g-ocean" style="height:100%">
+      <!-- REPLACE: hero ocean photo — File: assets/hero-ocean.jpg -->
+      <img src="assets/hero-ocean.jpg" fetchpriority="high"
+           alt="The sea seen from above: white foam breaking in ribbons across soft teal-green water.">
+    </div>
+  </div>
+  <div class="hero-scrim" aria-hidden="true"></div>
+
+  <h1 class="lock" id="lock">
+    <span class="lock-word l">Akiri</span>
+    <span class="lock-mark mark" aria-hidden="true"></span>
+    <span class="lock-word r">Studio</span>
+  </h1>
+
+  <nav class="hero-nav" aria-label="Primary">
+    <ul>
+      <li><a href="#collection" aria-current="page">collection</a></li>
+      <li><a href="#about">about</a></li>
+      <li><a href="#journal">journal</a></li>
+      <li><a href="#enquire">contact</a></li>
+    </ul>
+    <span class="scroll-cue" aria-hidden="true">scroll <span>↓</span></span>
+  </nav>
+
+  <div class="hero-release" aria-hidden="true"></div>
+  <div class="hero-wash" id="heroWash" aria-hidden="true"></div>
+</section>
+
+<!-- ═══ 2 · WHAT THE NAME MEANS ════════════════════════════════ -->
+<section class="sec statement" data-edge="Origin">
+  <!-- decoration in the margins — small, never announced, never over the copy -->
+  <span class="shell" style="--t:16%;--l:3.5%;--w:58px;--op:.24;--sp:.05" aria-hidden="true">
+    <img src="assets/shells/shell-6.png" alt="" style="--rot:-12deg"></span>
+  <span class="shell shell--r" style="--t:64%;--r:4%;--w:52px;--op:.2;--sp:-.045" aria-hidden="true">
+    <img src="assets/shells/shell-4.png" alt="" style="--rot:14deg"></span>
+  <!-- the coral the word itself refers to -->
+  <span class="shell shell--r" style="--t:8%;--r:8%;--w:104px;--op:.17;--sp:.06" aria-hidden="true">
+    <img src="assets/coral.png" alt="" style="--rot:6deg"></span>
+
+  <div class="wrap">
+    <span class="tag r">Origin</span>
+    <div class="statement-inner">
+      <p class="serif r" style="--d:120ms">
+        In Dhivehi, <span class="script glint" id="glint">akiri</span> describes the small,<br>
+        naturally broken pieces of coral<br>
+        found along our shores
+      </p>
+
+      <p class="thaana r" dir="rtl" lang="dv" style="--d:260ms">
+        <span class="th-word">އަކިރި</span><span class="th-def">: މުރަކައިގެ މަރުވެފައި ހުންނަ އެތިއެތިކޮޅު</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 3 · ABOUT ══════════════════════════════════════════════ -->
+<section class="sec about" id="about" data-edge="About">
+  <div class="wrap">
+    <div class="about-grid">
+      <div class="about-head r">
+        <span class="tag">About</span>
+        <h2>About Us</h2>
+      </div>
+
+      <div class="about-body r" style="--d:120ms">
+        <p>Inspired by the resilient coral rubble of our shores, Akiri Art Studio
+          celebrates the intersection of Maldivian heritage and contemporary jewelry
+          design.</p>
+        <p>Our mission is to honor the stories of our ancestors by transforming
+          cultural symbols into elegant, wearable art.</p>
+        <p>By blending traditional inspiration with modern aesthetics, we ensure that
+          the spirit of the Maldives lives on in every piece we create.</p>
+      </div>
+
+      <div class="about-stamp r" style="--d:260ms" aria-hidden="true">
+        <div class="stamp">
+          <svg viewBox="0 0 200 200">
+            <defs>
+              <path id="ring" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"/>
+            </defs>
+            <g class="stamp-ring">
+              <text font-family="Jost, sans-serif" font-size="13" font-weight="300"
+                    letter-spacing="2.6" fill="currentColor">
+                <textPath href="#ring" startOffset="0">
+                  @akiristudiomv || @akiristudiomv ||
+                </textPath>
+              </text>
+            </g>
+          </svg>
+          <span class="mark"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 4 · THE SUN PENDANT ════════════════════════════════════ -->
+<section class="sec collage" id="collection" data-edge="Collection">
+  <div class="wrap">
+    <div class="collage-head">
+      <span class="tag r">Collection</span>
+      <span class="tag r" style="--d:80ms">Maldives</span>
+    </div>
+
+    <div class="collage-grid">
+      <figure class="fig-a pop">
+        <div class="slot g-warm">
+          <!-- REPLACE: model portrait — File: assets/sun-outdoor.jpg -->
+          <img src="assets/sun-outdoor.jpg"
+               alt="A model in daylight wearing the Sun Pendant on a fine chain, a plant and pale sky behind her.">
+        </div>
+        <figcaption>The Sun Pendant <sup>(01)</sup></figcaption>
+      </figure>
+
+      <figure class="fig-b pop" style="--d:200ms">
+        <div class="slot g-warm">
+          <!-- REPLACE: detail shot — File: assets/conch-pair.jpg -->
+          <img src="assets/conch-pair.jpg"
+               alt="A model resting her chin on her hand, a rose-gold conch pendant over her knuckles and a gold one at her neck.">
+        </div>
+        <figcaption>Conch <sup>(02)</sup></figcaption>
+      </figure>
+
+      <div class="fig-loose r" style="--d:380ms" aria-hidden="true">
+        <div class="stamp">
+          <svg viewBox="0 0 200 200">
+            <defs>
+              <path id="ring2" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"/>
+            </defs>
+            <g class="stamp-ring">
+              <text font-family="Jost, sans-serif" font-size="13" font-weight="300"
+                    letter-spacing="2.6" fill="currentColor">
+                <textPath href="#ring2" startOffset="0">
+                  @akiristudiomv || @akiristudiomv ||
+                </textPath>
+              </text>
+            </g>
+          </svg>
+          <span class="mark"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- product plate -->
+<section class="sec plate bleed pop" data-edge="01" aria-label="The Sun Pendant">
+  <div class="slot g-shore">
+    <!-- REPLACE: full-bleed product frame — File: assets/sun-studio.jpg -->
+    <img src="assets/sun-studio.jpg"
+         alt="The Sun Pendant, a spiralling gold sun on a fine chain, worn against a beige neckline in warm light.">
+  </div>
+  <div class="plate-scrim" aria-hidden="true"></div>
+  <div class="plate-type">
+    <div class="plate-stack">
+      <span class="plate-num r" aria-hidden="true">01</span>
+      <h2 class="plate-name r" style="--d:140ms">the sun pendant</h2>
+      <span class="plate-sub r" style="--d:280ms">Akiri Studio — Collection 01</span>
+    </div>
+  </div>
+</section>
+
+<!-- three-line opener + story -->
+<section class="sec triad" data-edge="Journal">
+  <span class="shell shell--r" style="--t:14%;--r:4%;--w:62px;--op:.22;--sp:-.055" aria-hidden="true">
+    <img src="assets/shells/shell-11.png" alt="" style="--rot:8deg"></span>
+  <div class="wrap">
+    <span class="tag r">Journal</span>
+    <p class="r" style="--d:100ms">
+      <span>The water</span>
+      <span>The sand</span>
+      <span>The sun</span>
+    </p>
+  </div>
+</section>
+
+<section class="sec story" id="journal" data-edge="Journal">
+  <div class="wrap">
+    <div class="story-grid">
+      <div class="story-side r">
+        <div class="story-meta">
+          <dl>
+            <dt>Piece</dt><dd>The Sun Pendant</dd>
+            <dt>Collection</dt><dd>01</dd>
+            <dt>Origin</dt><dd>Maldives</dd>
+          </dl>
+        </div>
+      </div>
+
+      <div class="story-body">
+        <p class="r" style="--d:120ms">
+          &ldquo;Sitting on a joali with friends, watching the slight komorebi leak through
+          the leaves. Staring off at the ocean where the light dances with the waves,
+          flickering into your eyes. The Sun pendant was inspired by the first
+          settlers of the Maldives, worshippers of nature. Upon discovering a foreign
+          land, they had everything they could ask for, the water, the sand, and the
+          sun. You only realize how much you miss it once it is gone. So why not keep
+          it forever?&rdquo;
+        </p>
+        <a class="enquire r" id="enquire" href="#enquire" style="--d:260ms">enquire</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 5 · IMAGE BREAK ════════════════════════════════════════ -->
+<section class="sec break bleed pop" data-edge="Maldives" aria-label="On the shore">
+  <div class="slot g-shore">
+    <!-- REPLACE: full-bleed editorial break — File: assets/beach-pair.jpg -->
+    <img src="assets/beach-pair.jpg"
+         alt="Two models standing arm in arm on a bright shore, manta ray pendants at their necks and the pale sea behind them.">
+  </div>
+</section>
+
+<!-- ═══ 6 · CARE ═══════════════════════════════════════════════ -->
+<section class="sec care" data-edge="Care">
+  <span class="shell" style="--t:62%;--l:3.5%;--w:54px;--op:.22;--sp:.05" aria-hidden="true">
+    <img src="assets/shells/shell-10.png" alt="" style="--rot:-14deg"></span>
+  <div class="wrap">
+    <div class="care-grid">
+      <div class="care-tag r"><span class="tag">Our promise</span></div>
+      <div class="care-body r" style="--d:120ms">
+        <p>Akiri Studio is a brand created to allow everyone to be rooted to Maldivian
+          culture. It is an invitation to take back a story or a memory of what once
+          was, allowing you to live in the moment every time you wear our statement
+          pieces and to savor every second of your time in the islands. We, here at
+          Akiri Studio, aim to produce products of exceptional quality at affordable
+          costs, ensuring that everyone has the opportunity to relive their memories
+          through our jewelry. We believe that heritage should be accessible, and we
+          pour heart and effort into our ideas to ensure our customers feel a true
+          connection to the craft.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec care" style="background:var(--cream)" data-edge="Care">
+  <span class="shell shell--r" style="--t:26%;--r:4%;--w:56px;--op:.2;--sp:-.05" aria-hidden="true">
+    <img src="assets/shells/shell-2.png" alt="" style="--rot:15deg"></span>
+  <div class="wrap">
+    <div class="care-grid">
+      <div class="care-tag r"><span class="tag">The environment</span></div>
+      <div class="care-body r" style="--d:120ms">
+        <p>Beyond the jewelry itself, we are deeply committed to the environment that
+          inspires us. Our packaging is entirely eco-friendly, using sustainable,
+          plastic-free materials to protect the very oceans and reefs that define our
+          home. By choosing Akiri, you are not only wearing a piece of Maldivian
+          identity but also supporting a brand that respects the delicate balance of
+          our natural world. Every material is thoughtfully sourced to ensure
+          durability and ethical standards, so you can feel as good about your
+          purchase as you do wearing it. From the initial sketch to the moment you
+          unbox your piece, we strive for excellence in every detail, ensuring that
+          your experience is as seamless and beautiful as the islands themselves.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 7 · CLOSING IMAGE ══════════════════════════════════════ -->
+<section class="sec break bleed pop" data-edge="Maldives" aria-label="Conch at the water">
+  <div class="slot g-shore">
+    <!-- REPLACE: closing full-bleed — File: assets/conch-ocean.jpg -->
+    <img src="assets/conch-ocean.jpg"
+         alt="A model in profile at the water's edge, a gold conch pendant on a fine snake chain at her collarbone.">
+  </div>
+</section>
+
+</main>
+
+<!-- ═══ 8 · FOOTER ═════════════════════════════════════════════ -->
+<footer data-edge="Contact">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-mark mark r" aria-hidden="true"></div>
+
+      <div class="foot-line r" style="--d:100ms">
+        <p>Raw, natural elements refined into wearable art — so the spirit of the
+          Maldives lives on in every piece.</p>
+      </div>
+
+      <nav class="foot-links r" style="--d:180ms" aria-label="Contact">
+        <ul>
+          <li><a href="#enquire">enquire</a></li>
+          <li><a class="ig" href="https://www.instagram.com/akiristudiomv/"
+                 target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="3" width="18" height="18" rx="5"/>
+              <circle cx="12" cy="12" r="4.2"/>
+              <circle cx="17.2" cy="6.8" r="1.15" fill="currentColor" stroke="none"/>
+            </svg>@akiristudiomv</a></li>
+          <li><a href="#enquire">stockists</a></li>
+          <li><a href="#enquire">care</a></li>
+        </ul>
+      </nav>
+
+      <div class="foot-meta r" style="--d:260ms">
+        <a class="ig ig-badge" href="https://www.instagram.com/akiristudiomv/"
+           target="_blank" rel="noopener noreferrer" aria-label="Akiri Studio on Instagram">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="3" width="18" height="18" rx="5"/>
+            <circle cx="12" cy="12" r="4.2"/>
+            <circle cx="17.2" cy="6.8" r="1.15" fill="currentColor" stroke="none"/>
+          </svg>
+        </a>
+        <span class="clock"><span class="lbl">Malé</span><b id="clock">—</b></span>
+      </div>
+    </div>
+
+    <div class="foot-rule">
+      <span>Akiri Art Studio</span>
+      <span>Mockup — no checkout</span>
+      <span>© 2026</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var doc = document;
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ── photographs fade in only once they have actually decoded ── */
+  Array.prototype.forEach.call(doc.querySelectorAll('.slot img'), function(img){
+    var show = function(){ img.classList.add('loaded'); };
+    if (img.complete && img.naturalWidth > 0) show();
+    else img.addEventListener('load', show, {once:true});
+    img.addEventListener('error', function(){ img.style.display = 'none'; }, {once:true});
+  });
+
+  /* ── the mark is painted through a mask; without the file the mask never
+        applies and the element would render as a solid navy block ── */
+  (function(){
+    var probe = new Image();
+    probe.onerror = function(){ doc.body.classList.add('no-logo'); };
+    probe.src = 'assets/logo.png';
+  })();
+
+  /* ── load-in ── */
+  var reveal = function(){ doc.body.classList.add('ready'); };
+  if (reduce) reveal();
+  else window.setTimeout(reveal, 1150);
+  window.addEventListener('load', function(){
+    window.setTimeout(reveal, reduce ? 0 : 850);
+  });
+
+  /* ── scroll arrivals: text springs up, pictures pop open ── */
+  var rise = doc.querySelectorAll('.r, .pop, .shell');
+  if (!('IntersectionObserver' in window) || reduce){
+    Array.prototype.forEach.call(rise, function(el){ el.classList.add('in'); });
+  } else {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    }, {rootMargin:'0px 0px -10% 0px', threshold:0.06});
+    Array.prototype.forEach.call(rise, function(el){ io.observe(el); });
+  }
+
+  /* ── the glint runs only while the cursive word is on screen ── */
+  var glint = doc.getElementById('glint');
+  if (glint && !reduce){
+    if ('IntersectionObserver' in window){
+      var go = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){ glint.classList.toggle('shine', e.isIntersecting); });
+      }, {threshold:0.2});
+      go.observe(glint);
+    } else {
+      glint.classList.add('shine');
+    }
+  }
+
+  /* ── edge labels follow whichever section holds the viewport ── */
+  var edgeL = doc.getElementById('edgeL');
+  var marked = doc.querySelectorAll('[data-edge]');
+  if ('IntersectionObserver' in window && edgeL){
+    var eo = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting && e.intersectionRatio > 0.35){
+          var next = e.target.getAttribute('data-edge');
+          if (next !== edgeL.textContent){
+            edgeL.classList.add('hide');
+            window.setTimeout(function(){
+              edgeL.textContent = next;
+              edgeL.classList.remove('hide');
+            }, reduce ? 0 : 300);
+          }
+        }
+      });
+    }, {threshold:[0.35, 0.6]});
+    Array.prototype.forEach.call(marked, function(el){ eo.observe(el); });
+  }
+
+  /* ── hero: slow parallax, and the release into cream ── */
+  var hero = doc.querySelector('.hero');
+  var media = doc.getElementById('heroMedia');
+  var lock = doc.getElementById('lock');
+  var wash = doc.getElementById('heroWash');
+  var hdr = doc.getElementById('hdr');
+  var rings = doc.querySelectorAll('.stamp-ring');
+  var shells = doc.querySelectorAll('.shell');
+  var ticking = false;
+
+  function frame(){
+    ticking = false;
+    var y = window.pageYOffset || doc.documentElement.scrollTop;
+    var h = hero ? hero.offsetHeight : window.innerHeight;
+    var t = Math.min(Math.max(y / h, 0), 1);
+
+    if (!reduce && media) media.style.transform = 'translate3d(0,' + (y * 0.16).toFixed(2) + 'px,0)';
+    if (!reduce && lock){
+      lock.style.transform = 'translate3d(0,' + (y * -0.06).toFixed(2) + 'px,0) scale(' + (1 + t * 0.035).toFixed(4) + ')';
+      lock.style.opacity = String(Math.max(0, 1 - t * 1.65));
+    }
+    if (wash) wash.style.opacity = (Math.min(t * 1.15, 1) * 0.82).toFixed(3);
+
+    /* shells drift at their own speeds as they cross the viewport */
+    if (!reduce){
+      var vh = window.innerHeight;
+      Array.prototype.forEach.call(shells, function(sh){
+        var r = sh.getBoundingClientRect();
+        if (r.bottom < -240 || r.top > vh + 240) return;
+        var sp = parseFloat(getComputedStyle(sh).getPropertyValue('--sp')) || 0;
+        var d = (r.top + r.height / 2 - vh / 2) * sp;
+        sh.style.transform = 'translate3d(0,' + d.toFixed(2) + 'px,0)';
+      });
+    }
+
+    /* each stamp turns only as it passes through the viewport */
+    if (!reduce){
+      Array.prototype.forEach.call(rings, function(ring){
+        var rr = ring.getBoundingClientRect();
+        if (rr.bottom > -200 && rr.top < window.innerHeight + 200){
+          var p = 1 - (rr.top + rr.height / 2) / window.innerHeight;
+          ring.style.transform = 'rotate(' + (p * 46).toFixed(2) + 'deg)';
+        }
+      });
+    }
+
+    hdr.classList.toggle('solid', t >= 0.72);
+  }
+
+  function onScroll(){
+    if (!ticking){ ticking = true; window.requestAnimationFrame(frame); }
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  window.addEventListener('resize', onScroll, {passive:true});
+  frame();
+
+  /* ── the cursor: a disc that lags a little and swells over anything
+        you can actually click, inverting the page beneath it ── */
+  var cur = doc.getElementById('cursor');
+  if (cur && !reduce && window.matchMedia('(hover:hover) and (pointer:fine)').matches){
+    var tx = window.innerWidth / 2, ty = window.innerHeight / 2;
+    var cx = tx, cy = ty, running = false;
+
+    var step = function(){
+      cx += (tx - cx) * 0.18;
+      cy += (ty - cy) * 0.18;
+      cur.style.transform = 'translate3d(' + cx.toFixed(2) + 'px,' + cy.toFixed(2) + 'px,0) translate(-50%,-50%)';
+      if (Math.abs(tx - cx) > 0.1 || Math.abs(ty - cy) > 0.1) window.requestAnimationFrame(step);
+      else running = false;
+    };
+
+    doc.addEventListener('pointermove', function(e){
+      tx = e.clientX; ty = e.clientY;
+      cur.classList.add('on');
+      if (!running){ running = true; window.requestAnimationFrame(step); }
+    }, {passive:true});
+
+    doc.addEventListener('pointerleave', function(){ cur.classList.remove('on'); });
+
+    Array.prototype.forEach.call(doc.querySelectorAll('a, button, [data-hot]'), function(el){
+      el.addEventListener('pointerenter', function(){ cur.classList.add('hot'); });
+      el.addEventListener('pointerleave', function(){ cur.classList.remove('hot'); });
+    });
+  }
+
+  /* ── one small human detail: the time in Malé ── */
+  var clock = doc.getElementById('clock');
+  function tick(){
+    if (!clock) return;
+    var t;
+    try {
+      t = new Intl.DateTimeFormat('en-GB', {
+        timeZone:'Indian/Maldives', hour:'2-digit', minute:'2-digit', hour12:false
+      }).format(new Date());
+    } catch (err) {
+      var d = new Date();
+      var m = d.getUTCHours() * 60 + d.getUTCMinutes() + 300;
+      m = ((m % 1440) + 1440) % 1440;
+      t = ('0' + Math.floor(m / 60)).slice(-2) + ':' + ('0' + (m % 60)).slice(-2);
+    }
+    clock.textContent = t;
+  }
+  tick();
+  window.setInterval(tick, 15000);
+})();
+</script>
+
+</body>
+</html>
